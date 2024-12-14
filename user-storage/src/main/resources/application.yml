@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: user-storage
+  datasource:
+    url: jdbc:postgresql://postgres:5432/devops
+    username: admin
+    password: admin1234
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+flyway:
+  enabled: true
+  locations: classpath:db/migration
+  baseline-on-migrate: true
+  clean-disabled: true

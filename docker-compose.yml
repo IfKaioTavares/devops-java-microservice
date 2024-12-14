@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres-dev
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin1234
+      POSTGRES_DB: devops
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dev_network
+    hostname: postgres 
+    
+  persistent:
+    build:
+      context: ./user-storage  
+    container_name: storage-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_HOST: postgres 
+    networks:
+      - dev_network
+    command: ["sh", "-c", "until pg_isready -h postgres -p 5432; do sleep 2; done; java -jar /app.jar"]
+    hostname: persistent 
+
+  web:
+    build:
+      context: ./user-web
+    container_name: web-service  
+    ports:
+      - "8081:8081"
+    depends_on:
+      - persistent
+    environment:
+      STORAGE_SERVICE_HOST: persistent 
+    networks:
+      - dev_network
+    hostname: web 
+
+volumes:
+  postgres_data:
+
+networks:
+  dev_network:
+    driver: bridge
